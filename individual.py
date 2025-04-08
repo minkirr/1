@@ -1,44 +1,33 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 import requests
 
-WEBAPP_URL = 'https://strangepineaplle.github.io/lobzik-web/'
+WEBAPP_URL = "https://minkirr.github.io/web/"  # ссылка на твой miniapp
 
-def handle_individual(bot, message):
-    # Получаем доступные слоты
-    response = requests.get('http://localhost:5000/free_slots')  # Убедись, что Flask запущен
-    slots = response.json()
-
-    if not slots:
-        bot.send_message(message.chat.id, "Извините, нет доступных слотов для индивидуальных курсов.")
+def handle(bot, message):
+    try:
+        res = requests.get("http://127.0.0.1:5000/free_slots")
+        slots = res.json()
+    except Exception:
+        bot.send_message(message.chat.id, "Ошибка загрузки слотов.")
         return
 
-    # Создаем инлайн-кнопки для выбора слотов
-    markup = InlineKeyboardMarkup()
+    if not slots:
+        bot.send_message(message.chat.id, "Нет доступных слотов.")
+        return
+
+    markup = InlineKeyboardMarkup(row_width=1)
     for slot in slots:
-        button_text = f"{slot['дата']} - {slot['время']}"
-        callback_data = f"{slot['дата']}|{slot['время']}"
-        markup.add(InlineKeyboardButton(button_text, callback_data=callback_data))
+        slot_data = f"{slot['дата']} {slot['время']}"
+        btn = InlineKeyboardButton(
+            text=slot_data,
+            web_app=WebAppInfo(
+                url=f"{WEBAPP_URL}?дата={slot['дата']}&время={slot['время']}&tg_id={message.chat.id}"
+            )
+        )
+        markup.add(btn)
 
     bot.send_message(
         message.chat.id,
-        "Выберите удобный слот:",
+        "Выберите дату и время занятий, чтобы перейти к заполнению данных:",
         reply_markup=markup
     )
-
-# Обработка выбора слота
-def register_handlers(bot):
-    @bot.callback_query_handler(func=lambda call: '|' in call.data)
-    def handle_slot_selection(call):
-        date, time = call.data.split("|")
-
-        # Формируем ссылку на WebApp с параметрами
-        url = f"{WEBAPP_URL}?дата={date}&время={time}"
-
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton("Перейти к заполнению", web_app=WebAppInfo(url=url)))
-
-        bot.send_message(
-            call.message.chat.id,
-            f"Вы выбрали:\n📅 {date}\n⏰ {time}\n\nНажмите кнопку ниже, чтобы перейти к заполнению формы:",
-            reply_markup=markup
-        )
