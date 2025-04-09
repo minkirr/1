@@ -5,6 +5,7 @@ import threading
 import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import individual, gift, intense, event, kovorking, meeting
+import individual
 
 
 API_TOKEN = '7973114067:AAGM3sHdKjGOIurgmJaIT041Df3dc5QaCGQ'
@@ -25,9 +26,9 @@ def create_main_keyboard():
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
-    bot.send_message(message.chat.id, "Выберите опцию:", reply_markup=create_main_keyboard())
+    bot.send_message(message.chat.id, "Я бот лобзика бла бла помогу выбрать бла бла что вас интересует?", reply_markup=create_main_keyboard())
 
-@bot.message_handler(func=lambda m: m.text == 'индивидульный курс')
+@bot.message_handler(func=lambda m: m.text == 'Индивидуальный курс')
 def handle_individual_course(message):
     individual.handle(bot, message)
 
