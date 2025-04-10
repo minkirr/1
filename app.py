@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 import json
 import threading
@@ -8,10 +7,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import individual, gift, intense, event, kovorking, meeting
 import individual
 
-
-
-
-API_TOKEN = '7561870576:AAHSEpjx1nNH4aa6WBwNEe3MQzmWSsKUOCA'
+API_TOKEN = '7561870576:AAHSEpjx1nNH4aa6WBwNEe3MQzmWSsKUOCA'  # Замените на свой токен
 DB_PATH = 'database.json'
 
 app = Flask(__name__)
@@ -34,8 +30,6 @@ def start_handler(message):
 @bot.message_handler(content_types=['web_app_data'])
 def web_app(message: types.Message):
     bot.send_message(message.chat.id, "Получены данные из WebApp.")
-
-
 
 @bot.message_handler(func=lambda m: m.text == 'Индивидуальный курс')
 def handle_individual_course(message):
