@@ -6,6 +6,7 @@ from telebot import types
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import individual, gift, intense, event, kovorking, meeting
 import individual
+import requests
 
 API_TOKEN = '7561870576:AAHSEpjx1nNH4aa6WBwNEe3MQzmWSsKUOCA'  # Замените на свой токен
 DB_PATH = 'database.json'
@@ -30,30 +31,24 @@ def start_handler(message):
 @bot.message_handler(content_types=['web_app_data'])
 def web_app(message: types.Message):
     try:
-        print("Пришел запрос с WebApp.")  # Логируем начало обработки
         # Получаем данные из WebApp
         data = json.loads(message.web_app_data.data)
 
         # Логируем данные, чтобы убедиться, что они приходят
         print(f"Полученные данные: {data}")
 
-        # Проверяем, существует ли файл перед записью
-        try:
-            with open(DB_PATH, 'a') as db_file:
-                # Записываем данные в формате JSON
-                json.dump(data, db_file)
-                db_file.write("\n")  # Добавляем новую строку для каждого нового ввода
-            print("Данные успешно записаны в файл.")
-        except Exception as file_error:
-            print(f"Ошибка при записи в файл: {file_error}")
-            bot.send_message(message.chat.id, "Произошла ошибка при записи данных в файл.")
-
-        # Отправляем сообщение в Telegram
-        bot.send_message(
-            message.chat.id,
-            f"Получены данные:\nName: {data['name']}\nEmail: {data['email']}\nPhone: {data['phone']}\nДанные успешно сохранены!"
-        )
-
+        # Отправляем данные на сервер Flask
+        response = requests.post("http://127.0.0.1:5000/webapp_data", json=data)
+        if response.status_code == 200:
+            print("Данные успешно отправлены на сервер.")
+            bot.send_message(
+                message.chat.id,
+                f"Получены данные:\nName: {data['name']}\nEmail: {data['email']}\nPhone: {data['phone']}\nДанные успешно сохранены!"
+            )
+        else:
+            print("Ошибка при отправке данных на сервер.")
+            bot.send_message(message.chat.id, "Произошла ошибка при отправке данных на сервер.")
+        
     except Exception as e:
         # Если возникла ошибка, выводим её в консоль
         print(f"Ошибка при обработке данных: {e}")
