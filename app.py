@@ -3,12 +3,15 @@ from flask import Flask, request, jsonify
 import json
 import threading
 import telebot
+from telebot import types
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import individual, gift, intense, event, kovorking, meeting
 import individual
 
 
-API_TOKEN = '7973114067:AAGM3sHdKjGOIurgmJaIT041Df3dc5QaCGQ'
+
+
+API_TOKEN = '7561870576:AAHSEpjx1nNH4aa6WBwNEe3MQzmWSsKUOCA'
 DB_PATH = 'database.json'
 
 app = Flask(__name__)
@@ -27,6 +30,12 @@ def create_main_keyboard():
 @bot.message_handler(commands=['start'])
 def start_handler(message):
     bot.send_message(message.chat.id, "Я бот лобзика бла бла помогу выбрать бла бла что вас интересует?", reply_markup=create_main_keyboard())
+
+@bot.message_handler(content_types=['web_app_data'])
+def web_app(message: types.Message):
+    bot.send_message(message.chat.id, "Получены данные из WebApp.")
+
+
 
 @bot.message_handler(func=lambda m: m.text == 'Индивидуальный курс')
 def handle_individual_course(message):
